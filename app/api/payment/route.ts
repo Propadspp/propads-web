@@ -16,7 +16,11 @@ async function getAccessToken(): Promise<string> {
     }),
   });
 
-  if (!res.ok) throw new Error('Teya token request failed');
+  if (!res.ok) {
+    const errBody = await res.text();
+    console.error('Teya token failed:', res.status, errBody);
+    throw new Error('Teya token request failed');
+  }
   const { access_token } = await res.json();
   return access_token;
 }
