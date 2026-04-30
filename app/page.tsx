@@ -1,3 +1,5 @@
+export const revalidate = 0;
+
 import { client } from "@/lib/sanity";
 import PropadsPage from "@/components/PropadsPage";
 
