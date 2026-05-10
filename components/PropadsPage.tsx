@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { urlFor } from '@/lib/sanity';
 import type { Product } from '@/app/page';
 
+const FREE_SHIPPING_THRESHOLD = 5000;
+
 type CartItem = {
   id: string;
   name: string;
@@ -21,6 +23,7 @@ export default function PropadsPage({ products }: { products: Product[] }) {
   const [toastMsg, setToastMsg] = useState('');
   const [toastOn, setToastOn] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('propads_cart');
@@ -194,7 +197,11 @@ export default function PropadsPage({ products }: { products: Product[] }) {
                   </div>
                   <div className="product-body">
                     <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.6875rem', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 5 }}>{product.category}</p>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#fff', marginBottom: 6, lineHeight: 1.3 }}>{product.name}</h3>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#fff', marginBottom: 4, lineHeight: 1.3 }}>{product.name}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                      <span style={{ color: '#b8f03a', fontSize: '0.75rem', letterSpacing: 1 }}>★★★★★</span>
+                      <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>4.9 (3 umsagnir)</span>
+                    </div>
                     <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
                       {(['S', 'M', 'L'] as const).map(size => (
                         <button key={size} onClick={() => setSizes(p => ({ ...p, [product._id]: size }))}
@@ -203,6 +210,9 @@ export default function PropadsPage({ products }: { products: Product[] }) {
                         </button>
                       ))}
                     </div>
+                    <button onClick={() => setSizeGuideOpen(true)} style={{ background: 'none', border: 'none', padding: 0, marginBottom: 12, cursor: 'pointer', color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                      Stærðarleiðbeiningar
+                    </button>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                       <span className="font-display" style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#fff' }}>{product.price.toLocaleString('is-IS')} kr</span>
                       <button className="add-btn" onClick={() => addToCart(product)}>Í körfu</button>
@@ -279,9 +289,9 @@ export default function PropadsPage({ products }: { products: Product[] }) {
         </div>
         {[
           { q: 'Hvernig vel ég rétta stærð?', a: 'Legghlífarnar koma í S (fyrir börn 8–12 ára), M (unglinga og létta fullorðna) og L (fullorðna). Gripsokkar: S er skónúmer 34–38, M er 39–42 og L er 43–47.' },
-          { q: 'Hversu fljótt fæ ég pöntunina?', a: 'Við sendum alla pöntun samdægurs ef hún berst fyrir kl. 14:00 á virkum degi á höfuðborgasvæðið. Hafðu samband á propadspp@gmail.com ef þú ert utan.' },
+          { q: 'Hversu fljótt fæ ég pöntunina?', a: 'Við sendum alla pöntun samdægurs ef hún berst fyrir kl. 14:00 á virkum degi á höfuðborgasvæðið. Hafðu samband á info@propads.is ef þú ert utan.' },
           { q: 'Get ég skilað vöru?', a: 'Ónotaðar vörur í upprunalegu ástandi skila sér gegn inneign í búðinni innan 30 daga.' },
-          { q: 'Hvernig hef ég samband?', a: 'Sendu okkur tölvupóst á propadspp@gmail.com eða fylgdu okkur á Instagram @propadsiceland.' },
+          { q: 'Hvernig hef ég samband?', a: 'Sendu okkur tölvupóst á info@propads.is eða fylgdu okkur á Instagram @propadsiceland.' },
         ].map((item, i) => (
           <details key={i} className="faq-item">
             <summary>{item.q}<span className="faq-arrow">▾</span></summary>
@@ -294,7 +304,7 @@ export default function PropadsPage({ products }: { products: Product[] }) {
       <div className="trust-bar">
         <div className="trust-grid" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)' }}>
           {[
-            { path: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', title: 'Ókeypis sending', desc: 'Á pantanir yfir 7.000 kr á höfuðborgasvæðinu' },
+            { path: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', title: 'Ókeypis sending', desc: 'Á pantanir yfir 5.000 kr á höfuðborgasvæðinu' },
             { path: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', title: '30 daga skilafrestur', desc: 'Ef þér líkar ekki — skilaðu' },
             { path: 'M13 10V3L4 14h7v7l9-11h-7z', title: 'Hraðsending', desc: 'Höfuðborgasvæðið' },
           ].map((item, i) => (
@@ -327,7 +337,7 @@ export default function PropadsPage({ products }: { products: Product[] }) {
               const fd = new FormData(e.currentTarget);
               const name = fd.get('nafn') as string;
               const msg = fd.get('skilabod') as string;
-              window.location.href = `mailto:propadspp@gmail.com?subject=${encodeURIComponent('Fyrirspurn frá ' + name)}&body=${encodeURIComponent(msg)}`;
+              window.location.href = `mailto:info@propads.is?subject=${encodeURIComponent('Fyrirspurn frá ' + name)}&body=${encodeURIComponent(msg)}`;
             }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[
                 { name: 'nafn', label: 'Nafn', type: 'text', placeholder: 'Nafnið þitt' },
@@ -350,7 +360,7 @@ export default function PropadsPage({ products }: { products: Product[] }) {
               <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#fff', marginBottom: 24 }}>Tengiliðaupplýsingar</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {[
-                  { label: 'Tölvupóstur', value: 'propadspp@gmail.com', href: 'mailto:propadspp@gmail.com' },
+                  { label: 'Tölvupóstur', value: 'info@propads.is', href: 'mailto:info@propads.is' },
                   { label: 'Instagram', value: '@propadsiceland', href: '#' },
                   { label: 'Staðsetning', value: 'Reykjavík, Ísland', href: null },
                 ].map(c => (
@@ -381,7 +391,7 @@ export default function PropadsPage({ products }: { products: Product[] }) {
             {[
               { title: 'Vörur', links: [{ href: '#legghlif', label: 'Legghlífar' }, { href: '#gripsokkar', label: 'Gripsokkar' }, { href: '#vorur', label: 'Nýjar vörur' }] },
               { title: 'Fyrirtækið', links: [{ href: '#um-okkur', label: 'Um okkur' }, { href: '#hafa-samband', label: 'Hafðu samband' }, { href: '/skilaregla', label: 'Skilaregla' }] },
-              { title: 'Tengiliðir', links: [{ href: 'mailto:propadspp@gmail.com', label: 'propadspp@gmail.com' }, { href: '#', label: '@propadsiceland' }] },
+              { title: 'Tengiliðir', links: [{ href: 'mailto:info@propads.is', label: 'info@propads.is' }, { href: '#', label: '@propadsiceland' }] },
             ].map(col => (
               <div key={col.title}>
                 <h5 style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>{col.title}</h5>
@@ -413,6 +423,25 @@ export default function PropadsPage({ products }: { products: Product[] }) {
           <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Karfan þín</h2>
           <button onClick={() => setDrawerOpen(false)} aria-label="Loka körfu" style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 9, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
         </div>
+        {/* FREE SHIPPING UPSELL BAR */}
+        {(() => {
+          const remaining = FREE_SHIPPING_THRESHOLD - totalPrice;
+          const pct = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100);
+          return (
+            <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(184,240,58,0.04)', flexShrink: 0 }}>
+              {remaining > 0 ? (
+                <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.65)', marginBottom: 8 }}>
+                  <span style={{ color: '#b8f03a', fontWeight: 600 }}>{remaining.toLocaleString('is-IS')} kr</span> vantar í fría sendingu!
+                </p>
+              ) : (
+                <p style={{ fontSize: '0.8125rem', color: '#b8f03a', fontWeight: 600, marginBottom: 8 }}>Þú átt rétt á fríri sendingu!</p>
+              )}
+              <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 999, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: '#b8f03a', borderRadius: 999, transition: 'width 0.3s ease' }} />
+              </div>
+            </div>
+          );
+        })()}
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px' }}>
           {cart.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, padding: '60px 0', textAlign: 'center' }}>
@@ -445,6 +474,13 @@ export default function PropadsPage({ products }: { products: Product[] }) {
               <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem' }}>Samtals</span>
               <span className="font-display" style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.025em' }}>{totalPrice.toLocaleString('is-IS')} kr</span>
             </div>
+            {/* PAYMENT TRUST BADGE */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#b8f03a" strokeWidth="2" style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>SSL öruggar greiðslur · Visa · Mastercard</span>
+            </div>
             <button onClick={checkout} disabled={paying} style={{ width: '100%', padding: 14, background: '#b8f03a', color: '#080808', fontWeight: 600, fontSize: '1rem', borderRadius: 12, border: 'none', cursor: paying ? 'not-allowed' : 'pointer', opacity: paying ? 0.7 : 1 }}>
               {paying ? 'Hleður...' : 'Klára kaup'}
             </button>
@@ -456,6 +492,71 @@ export default function PropadsPage({ products }: { products: Product[] }) {
       <div role="status" aria-live="polite" style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9000, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', padding: '12px 20px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 500, boxShadow: '0 8px 32px rgba(0,0,0,0.5)', opacity: toastOn ? 1 : 0, transform: toastOn ? 'translateY(0)' : 'translateY(8px)', pointerEvents: 'none', transition: 'opacity 0.25s ease, transform 0.25s ease' }}>
         {toastMsg}
       </div>
+
+      {/* SIZE GUIDE MODAL */}
+      {sizeGuideOpen && (
+        <>
+          <div onClick={() => setSizeGuideOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 300, backdropFilter: 'blur(4px)' }} />
+          <div role="dialog" aria-modal="true" aria-label="Stærðarleiðbeiningar" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 301, background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 32, width: '90%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: '#fff' }}>Stærðarleiðbeiningar</h2>
+              <button onClick={() => setSizeGuideOpen(false)} aria-label="Loka" style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 9, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '1.25rem' }}>×</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <div>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#b8f03a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Legghlífar</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      {['Stærð', 'Aldur / Hæð', 'Læralengd'].map(h => (
+                        <th key={h} style={{ padding: '8px 0', textAlign: 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ['S', '8–12 ára', '25–32 cm'],
+                      ['M', '13–16 ára / ~160 cm', '33–40 cm'],
+                      ['L', 'Fullorðnir / 170+ cm', '41–48 cm'],
+                    ].map(([size, age, len]) => (
+                      <tr key={size} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td style={{ padding: '10px 0', color: '#fff', fontWeight: 600 }}>{size}</td>
+                        <td style={{ padding: '10px 0', color: 'rgba(255,255,255,0.6)' }}>{age}</td>
+                        <td style={{ padding: '10px 0', color: 'rgba(255,255,255,0.6)' }}>{len}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#b8f03a', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Gripsokkar</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      {['Stærð', 'Skónúmer'].map(h => (
+                        <th key={h} style={{ padding: '8px 0', textAlign: 'left', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ['S', '34–38'],
+                      ['M', '39–42'],
+                      ['L', '43–47'],
+                    ].map(([size, shoe]) => (
+                      <tr key={size} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td style={{ padding: '10px 0', color: '#fff', fontWeight: 600 }}>{size}</td>
+                        <td style={{ padding: '10px 0', color: 'rgba(255,255,255,0.6)' }}>{shoe}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>Ef þú ert á milli stærða mælum við með að velja stærri. Spurningar? Sendu okkur línu á info@propads.is</p>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
